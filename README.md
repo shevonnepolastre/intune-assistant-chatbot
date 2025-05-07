@@ -1,41 +1,26 @@
 # Intune Assistant Chatbot
 
-Currently going through the Microsoft AI Skills Fest.  One of my technical mentors pointed me in this direction in building a chatbot using RAG.  
+Currently going through the Microsoft AI Skills Fest.  One of my technical mentors pointed me in this direction in building a chatbot using Retrieval-Augmented Generation (RAG).  
 
-I expect this to take my six weeks, so this is the breakdown of my plans:
+Currently, I'm learning Python and want to focus on Devops and AI since that's where I want to go. 
 
-Week 1 – Planning & Kickoff
-- Define the chatbot's audience (Admin, Helpdesk, End User)
-- Draft basic user flows and install paths (Windows, macOS, mobile)
-- Choose bot tech: Azure Bot Service + Composer or Node.js
-
-Week 2 – Bot Framework Setup
-- Create the initial bot project
-- Add Azure hosting (Bot Service or App Service)
-- Deploy a "Hello World" version
-
-Week 3 – Add Intune Dialog Logic
-- Build Intune install flow (Windows) using PowerShell and Company Portal
-- Add instructions for macOS, iOS, and Android
-- Chatbot Intune Install Steps
-
-Week 4 – Data Integration (Graph + CI/CD)
-- Register Azure AD app for Microsoft Graph API access
-- Connect bot to Graph to retrieve device and policy info
-- Set up GitHub Actions to automate bot deployment
-
-Week 5 – Secure & Monitor
-- Add Azure Key Vault for storing secrets
-- Configure Managed Identity or app registration for authentication
-- Integrate Application Insights for logs and telemetry
-
-Week 6 – Deploy & Recap
-- Finalize production deployment
-- Test chatbot with sample users
+Therefore, I decided to take do a chatbot that teaches you how to implement Intune for a company.  
 
 ## Why Intune
 
 I am going to be managing a project where we are standing up Intune so thought it would be good to create a chatbot that helps a team stand it up.  
+
+## Project Scenario
+This project builds an intelligent chatbot that assists IT support and employees at Skyline Dynamics with Microsoft Intune device enrollment, compliance, and troubleshooting. The chatbot leverages Retrieval-Augmented Generation (RAG) to dynamically pull context from internal documentation and live Intune policy data.
+
+## Architecture Overview
+Frontend: Copilot SDK chatbot interface
+
+Backend: Azure AI Foundry and Python 
+
+Retrieval Strategy: RAG - retrieve documents and data at runtime to enrich LLM responses
+
+<img src="/Users/shevonnepolastre/intune-assistant-chatbot/images/azure_rag_chatbot_architecture.png">
 
 ## Resources 
 

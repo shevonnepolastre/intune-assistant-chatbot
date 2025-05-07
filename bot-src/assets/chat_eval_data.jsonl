@@ -1,0 +1,3 @@
+{"query": "How do I Add tenant attach?", "truth": "Tenant attach allows you to upload your Configuration Manager devices to your organization in Intune, also known as a tenant."}
+{"query": "How do I Move from Configuration Manager to Intune", "truth": "Most existing Configuration Manager customers want to keep using Configuration Manager. It includes services that are beneficial for on-premises devices."}
+{"query": "How do I Currently use on-premises group policy?", "truth": "When you manage devices, Intune device configuration profiles replace on-premises GPO. Device configuration profiles use settings exposed by Apple, Google, and Microsoft."}
