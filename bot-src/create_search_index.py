@@ -1,13 +1,35 @@
 import os
-import pdfplumber
-import logging
-import pandas as pd
 from azure.ai.projects import AIProjectClient
 from azure.ai.projects.models import ConnectionType
 from azure.identity import DefaultAzureCredential
 from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
+from config import get_logger
+
+# initialize logging object
+logger = get_logger(__name__)
+
+# create a project client using environment variables loaded from the .env file
+project = AIProjectClient.from_connection_string(
+    conn_str=os.environ["AIPROJECT_CONNECTION_STRING"], credential=DefaultAzureCredential()
+)
+
+# create a vector embeddings client that will be used to generate vector embeddings
+embeddings = project.inference.get_embeddings_client()
+
+# use the project client to get the default search connection
+search_connection = project.connections.get_default(
+    connection_type=ConnectionType.AZURE_AI_SEARCH, include_credentials=True
+)
+
+# Create a search index client using the search connection
+# This client will be used to create and delete search indexes
+index_client = SearchIndexClient(
+    endpoint=search_connection.endpoint_url, credential=AzureKeyCredential(key=search_connection.key)
+)
+
+import pandas as pd
 from azure.search.documents.indexes.models import (
     SemanticSearch,
     SearchField,
@@ -27,36 +49,15 @@ from azure.search.documents.indexes.models import (
     VectorSearchProfile,
     SearchIndex,
 )
-from config import get_logger
 
-# Initialize logging object
-logger = get_logger(__name__)
-
-# Create a project client
-project = AIProjectClient.from_connection_string(
-    conn_str=os.environ["AIPROJECT_CONNECTION_STRING"],
-    credential=DefaultAzureCredential()
-)
-
-# Create a vector embeddings client
-embeddings = project.inference.get_embeddings_client()
-
-# Use the project client to get the default search connection
-search_connection = project.connections.get_default(
-    connection_type=ConnectionType.AZURE_AI_SEARCH, include_credentials=True
-)
-
-# Create a search index client
-index_client = SearchIndexClient(
-    endpoint=search_connection.endpoint_url,
-    credential=AzureKeyCredential(key=search_connection.key)
-)
 
 def create_index_definition(index_name: str, model: str) -> SearchIndex:
-    dimensions = 1536  # Default for text-embedding-ada-002
+    dimensions = 1536  # text-embedding-ada-002
     if model == "text-embedding-3-large":
         dimensions = 3072
 
+    # The fields we want to index. The "embedding" field is a vector field that will
+    # be used for vector search.
     fields = [
         SimpleField(name="id", type=SearchFieldDataType.String, key=True),
         SearchableField(name="content", type=SearchFieldDataType.String),
@@ -67,11 +68,13 @@ def create_index_definition(index_name: str, model: str) -> SearchIndex:
             name="contentVector",
             type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
             searchable=True,
+            # Size of the vector created by the text-embedding-ada-002 model.
             vector_search_dimensions=dimensions,
             vector_search_profile_name="myHnswProfile",
         ),
     ]
 
+    # The "content" field should be prioritized for semantic ranking.
     semantic_config = SemanticConfiguration(
         name="default",
         prioritized_fields=SemanticPrioritizedFields(
@@ -81,6 +84,9 @@ def create_index_definition(index_name: str, model: str) -> SearchIndex:
         ),
     )
 
+    # For vector search, we want to use the HNSW (Hierarchical Navigable Small World)
+    # algorithm (a type of approximate nearest neighbor search algorithm) with cosine
+    # distance.
     vector_search = VectorSearch(
         algorithms=[
             HnswAlgorithmConfiguration(
@@ -111,8 +117,10 @@ def create_index_definition(index_name: str, model: str) -> SearchIndex:
         ],
     )
 
+    # Create the semantic settings with the configuration
     semantic_search = SemanticSearch(configurations=[semantic_config])
 
+    # Create the search index definition
     return SearchIndex(
         name=index_name,
         fields=fields,
@@ -120,42 +128,47 @@ def create_index_definition(index_name: str, model: str) -> SearchIndex:
         vector_search=vector_search,
     )
 
-def create_docs_from_pdf(path: str, model: str) -> list[dict[str, any]]:
+    # define a function for indexing a csv file, that adds each row as a document
+# and generates vector embeddings for the specified content_column
+def create_docs_from_csv(path: str, content_column: str, model: str) -> list[dict[str, any]]:
+    intune = pd.read_csv(path)
     items = []
-    with pdfplumber.open(path) as pdf:
-        for page_num, page in enumerate(pdf.pages):
-            text = page.extract_text()
-            if not text:
-                continue  # skip empty pages
-            content = text.strip()
-            id = f"page-{page_num}"
-            title = f"Page {page_num}"
-            url = f"/pdf/{id}"
-            emb = embeddings.embed(input=content, model=model)
-            rec = {
-                "id": id,
-                "content": content,
-                "filepath": f"page-{page_num}",
-                "title": title,
-                "url": url,
-                "contentVector": emb.data[0].embedding,
-            }
-            items.append(rec)
+    for product in intune.to_dict("records"):
+        content = product[content_column]
+        id = str(product["id"])
+        title = product["name"]
+        url = f"/intune/{title.lower().replace(' ', '-')}"
+        emb = embeddings.embed(input=content, model=model)
+        rec = {
+            "id": id,
+            "content": content,
+            "filepath": f"{title.lower().replace(' ', '-')}",
+            "title": title,
+            "url": url,
+            "contentVector": emb.data[0].embedding,
+        }
+        items.append(rec)
+
     return items
 
-def create_index_from_pdf(index_name: str, pdf_file: str):
+
+def create_index_from_csv(index_name, csv_file):
+    # If a search index already exists, delete it:
     try:
         index_definition = index_client.get_index(index_name)
         index_client.delete_index(index_name)
-        logger.info(f"🗑️ Found existing index named '{index_name}', and deleted it")
+        logger.info(f"🗑️  Found existing index named '{index_name}', and deleted it")
     except Exception:
         pass
 
+    # create an empty search index
     index_definition = create_index_definition(index_name, model=os.environ["EMBEDDINGS_MODEL"])
     index_client.create_index(index_definition)
 
-    docs = create_docs_from_pdf(path=pdf_file, model=os.environ["EMBEDDINGS_MODEL"])
+    # create documents from the intune.csv file, generating vector embeddings for the "description" column
+    docs = create_docs_from_csv(path=csv_file, content_column="description", model=os.environ["EMBEDDINGS_MODEL"])
 
+    # Add the documents to the index using the Azure AI Search client
     search_client = SearchClient(
         endpoint=search_connection.endpoint_url,
         index_name=index_name,
@@ -172,18 +185,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--index-name",
         type=str,
-        help="Index name to create in Azure AI Search",
+        help="index name to use when creating the AI Search index",
         default=os.environ["AISEARCH_INDEX_NAME"],
     )
     parser.add_argument(
-        "--pdf-file",
-        type=str,
-        help="Path to the PDF file containing documents",
-        default="assets/migration.pdf",
+        "--csv-file", type=str, help="path to data for creating search index", default="bot-src/assets/intune.csv"
     )
     args = parser.parse_args()
-
     index_name = args.index_name
-    pdf_file = args.pdf_file
+    csv_file = args.csv_file
 
-    create_index_from_pdf(index_name, pdf_file)
+    create_index_from_csv(index_name, csv_file)

@@ -1,0 +1,6 @@
+id,name,category,brand,description
+1,Windows Device Enrollment Instructions,Enrollment,Microsoft Intune,To enroll a Windows 10 or Windows 11 device into Microsoft Intune: Open Settings > Accounts > Access work or school > Connect > Join this device to Azure Active Directory. Complete Company Portal setup if prompted.
+2,Installing Company Portal App,Setup,Microsoft Intune,Download the Company Portal app from the Microsoft Store (Windows) or App Store/Google Play (iOS/Android). Sign in with your work credentials and follow the enrollment steps.
+3,Intune Compliance Policies Overview,Compliance,Microsoft Intune,"Skyline Dynamics enforces compliance policies requiring BitLocker encryption, antivirus software, supported OS versions, and password/PIN device access."
+4,Resolving Common Compliance Failures,Troubleshooting,Microsoft Intune,"To resolve compliance failures, ensure BitLocker is enabled, antivirus is active, OS is updated, and a lock screen password is set. Recheck compliance in the Company Portal."
+5,Unenrolling a Device from Intune,Device Management,Microsoft Intune,"To remove a device from Intune, open Settings > Accounts > Access work or school, select your work account, and disconnect. Optionally uninstall Company Portal."
