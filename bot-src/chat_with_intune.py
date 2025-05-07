@@ -3,10 +3,12 @@ from pathlib import Path
 from opentelemetry import trace
 from azure.ai.projects import AIProjectClient
 from azure.identity import DefaultAzureCredential
-from _config import ASSET_PATH, get_logger, enable_telemetry
-from get_intune_documents import get_intune_documents
+from config import ASSET_PATH, get_logger, enable_telemetry
+from get_product_documents import get_product_documents
 
-from azure.ai.inference.prompts import PromptTemplate
+# Instrument AI Inference API 
+
+AIInferenceInstrumentor().instrument()
 
 # initialize logging and tracing objects
 logger = get_logger(__name__)
@@ -51,8 +53,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--query",
         type=str,
-        help="Query to use compliance policies",
-        default="I need to know the best compliance policies, what would you recommend?",
+        help="Query to use to search product",
+        default="I need a new tent for 4 people, what would you recommend?",
     )
     parser.add_argument(
         "--enable-telemetry",
@@ -60,10 +62,8 @@ if __name__ == "__main__":
         help="Enable sending telemetry back to the project",
     )
     args = parser.parse_args()
-
     if args.enable_telemetry:
         enable_telemetry(True)
 
-    # run chat with intune
-    response = chat_with_intune(messages=[{"role": "user", "content": args.query}])
-    print(response["message"]["content"])
+    # run chat with products
+    response = chat_with_products(messages=[{"role": "user", "content": args.query}])
