@@ -3,8 +3,10 @@ from pathlib import Path
 from opentelemetry import trace
 from azure.ai.projects import AIProjectClient
 from azure.identity import DefaultAzureCredential
-from config import ASSET_PATH, get_logger, enable_telemetry
-from get_product_documents import get_product_documents
+from bot_src.config import ASSET_PATH, get_logger, enable_telemetry
+from bot_src.get_intune_documents import get_intune_documents
+
+from azure.ai.inference.tracing import AIInferenceInstrumentor 
 
 # Instrument AI Inference API 
 
@@ -16,19 +18,20 @@ tracer = trace.get_tracer(__name__)
 
 # create a project client using environment variables loaded from the .env file
 project = AIProjectClient.from_connection_string(
-    conn_str=os.environ["AIPROJECT_CONNECTION_STRING"],
-    credential=DefaultAzureCredential()
+    conn_str=os.environ["AIPROJECT_CONNECTION_STRING"], credential=DefaultAzureCredential()
 )
 
 # create a chat client we can use for testing
 chat = project.inference.get_chat_completions_client()
+
+from azure.ai.inference.prompts import PromptTemplate
+
 
 @tracer.start_as_current_span(name="chat_with_intune")
 def chat_with_intune(messages: list, context: dict = None) -> dict:
     if context is None:
         context = {}
 
-    # <-- Now correctly retrieving Intune documents
     documents = get_intune_documents(messages, context)
 
     # do a grounded chat call using the search results
@@ -42,11 +45,11 @@ def chat_with_intune(messages: list, context: dict = None) -> dict:
     )
     logger.info(f"💬 Response: {response.choices[0].message}")
 
-    # Return a chat protocol compliant response
     return {"message": response.choices[0].message, "context": context}
 
-if __name__ == "__main__":
-    import argparse
+
+    if __name__ == "__main__":
+        import argparse
 
     # load command line arguments
     parser = argparse.ArgumentParser()
@@ -65,5 +68,8 @@ if __name__ == "__main__":
     if args.enable_telemetry:
         enable_telemetry(True)
 
-    # run chat with products
-    response = chat_with_products(messages=[{"role": "user", "content": args.query}])
+    # run chat with intune
+    response = chat_with_intune(messages=[{"role": "user", "content": args.query}])
+
+    print(response)
+

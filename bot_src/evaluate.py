@@ -4,8 +4,10 @@ from azure.ai.projects import AIProjectClient
 from azure.ai.projects.models import ConnectionType
 from azure.ai.evaluation import evaluate, GroundednessEvaluator
 from azure.identity import DefaultAzureCredential
+from bot_src.config import ASSET_PATH, get_logger, enable_telemetry
 
-from chat_with_products import chat_with_products
+
+from bot_src.chat_with_intune import chat_with_intune
 
 # load environment variables from the .env file at the root of this repo
 from dotenv import load_dotenv
@@ -28,13 +30,13 @@ evaluator_model = {
 
 groundedness = GroundednessEvaluator(evaluator_model)
 
-def evaluate_chat_with_products(query):
-    response = chat_with_products(messages=[{"role": "user", "content": query}])
+def evaluate_chat_with_intune(query):
+    response = chat_with_intune(messages=[{"role": "user", "content": query}])
     return {"response": response["message"].content, "context": response["context"]["grounding_data"]}
 
 # Evaluate must be called inside of __main__, not on import
 if __name__ == "__main__":
-    from config import ASSET_PATH
+    from bot_src.config import ASSET_PATH
 
     # workaround for multiprocessing issue on linux
     from pprint import pprint
@@ -47,9 +49,9 @@ if __name__ == "__main__":
 
     # run evaluation with a dataset and target function, log to the project
     result = evaluate(
-        data=Path(ASSET_PATH) / "chat_eval_data.jsonl",
-        target=evaluate_chat_with_products,
-        evaluation_name="evaluate_chat_with_products",
+        data=Path(ASSET_PATH) / "bot_src/chat_eval_data.jsonl",
+        target=evaluate_chat_with_intune,
+        evaluation_name="evaluate_chat_with_intune",
         evaluators={
             "groundedness": groundedness,
         },

@@ -1,0 +1,15 @@
+{"query": "How do I enroll a Windows device?", "truth": "To enroll a Windows device into Intune, users typically sign in with their work account and register the device through the Company Portal app or Windows Settings under 'Access work or school'."}
+{"query": "How can I enroll my iPhone into Intune?", "truth": "Install the Microsoft Company Portal app from the App Store, sign in with your work credentials, and follow the guided setup to enroll your iOS device into Intune."}
+{"query": "What is required to enroll a macOS device?", "truth": "For macOS devices, you need to install the Company Portal app, sign in with work credentials, and download a management profile that allows Intune to manage the device."}
+{"query": "Can Intune manage Android devices?", "truth": "Yes, Intune can manage Android devices using either Android Enterprise Work Profile or Android Device Administrator, depending on the organization's settings."}
+{"query": "What is Conditional Access in Intune?", "truth": "Conditional Access policies in Intune help enforce security requirements, such as requiring compliant devices or MFA before granting access to company resources."}
+{"query": "How can I check if my device is compliant?", "truth": "Use the Company Portal app or go to device settings under 'Access work or school' to view the compliance status and any required actions."}
+{"query": "What happens if a device is non-compliant?", "truth": "If a device is non-compliant, Conditional Access policies can block access to company resources until the compliance issues are resolved."}
+{"query": "What is a compliance policy in Intune?", "truth": "A compliance policy defines rules and settings that a device must meet, such as password requirements, encryption, and OS version, to be considered compliant."}
+{"query": "Can I manually trigger a device check-in with Intune?", "truth": "Yes, users can manually sync their device with Intune via the Company Portal app or the device settings under 'Access work or school'."}
+{"query": "How do I remove a device from Intune?", "truth": "To remove a device from Intune, users can unenroll the device through the Company Portal app or through device management settings by removing the work account."}
+{"query": "What data does Intune collect from personal devices?", "truth": "Intune collects information necessary for compliance and security management, such as device model, OS version, and compliance status, but does not access personal emails, photos, or text messages."}
+{"query": "Is Intune MDM free with Microsoft 365?", "truth": "Basic MDM capabilities are included with some Microsoft 365 plans, but advanced Intune features require an Intune or Enterprise Mobility + Security (EMS) license."}
+{"query": "Can I wipe a lost device with Intune?", "truth": "Yes, administrators can remotely wipe or selectively wipe corporate data from a lost or stolen device using Intune."}
+{"query": "How often do devices check in with Intune?", "truth": "By default, devices check in with Intune every 8 hours to receive policy updates and report status, though this interval can vary by device platform."}
+
