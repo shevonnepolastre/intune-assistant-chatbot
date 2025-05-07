@@ -20,7 +20,7 @@ Backend: Azure AI Foundry and Python
 
 Retrieval Strategy: RAG - retrieve documents and data at runtime to enrich LLM responses
 
-<img src="/Users/shevonnepolastre/intune-assistant-chatbot/images/azure_rag_chatbot_architecture.png">
+<img src="https://github.com/shevonnepolastre/intune-assistant-chatbot/blob/main/images/azure_rag_chatbot_architecture.png">
 
 ## Resources 
 
