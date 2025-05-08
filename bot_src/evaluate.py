@@ -1,75 +1,39 @@
 import os
-import pandas as pd
-from azure.ai.projects import AIProjectClient
-from azure.ai.projects.models import ConnectionType
-from azure.ai.evaluation import evaluate, GroundednessEvaluator
-from azure.identity import DefaultAzureCredential
-from bot_src.config import ASSET_PATH, get_logger, enable_telemetry
-
-
-from bot_src.chat_with_intune import chat_with_intune
-
-# load environment variables from the .env file at the root of this repo
 from dotenv import load_dotenv
+from azure.ai.projects import AIProjectClient
+from azure.identity import DefaultAzureCredential
 
+# Load environment variables
 load_dotenv()
 
-# create a project client using environment variables loaded from the .env file
+# Create a credential
+credential = DefaultAzureCredential()
+
+# Connect to your Azure AI Foundry Project
 project = AIProjectClient.from_connection_string(
-    conn_str=os.environ["AIPROJECT_CONNECTION_STRING"], credential=DefaultAzureCredential()
+    conn_str=os.environ["AIPROJECT_CONNECTION_STRING"],
+    credential=credential,
 )
 
-connection = project.connections.get_default(connection_type=ConnectionType.AZURE_OPEN_AI, include_credentials=True)
+# Correct client: get Azure OpenAI compatible client
+openai_client = project.inference.get_azure_openai_client(api_version="2024-06-01")
 
-evaluator_model = {
-    "azure_endpoint": connection.endpoint_url,
-    "azure_deployment": os.environ["EVALUATION_MODEL"],
-    "api_version": "2024-06-01",
-    "api_key": connection.key,
-}
+# Prepare messages
+messages = [
+    {"role": "system", "content": "You are a Microsoft Intune expert helping users enroll their devices into Intune."},
+    {"role": "user", "content": "How do I enroll a Windows 10 device into Intune?"},
+]
 
-groundedness = GroundednessEvaluator(evaluator_model)
+# Call the OpenAI API properly
+response = openai_client.chat.completions.create(
+    model=os.environ["CHAT_MODEL"],  # e.g., "gpt-4o-mini"
+    messages=messages,
+)
 
-def evaluate_chat_with_intune(query):
-    response = chat_with_intune(messages=[{"role": "user", "content": query}])
-    return {"response": response["message"].content, "context": response["context"]["grounding_data"]}
+# Output the response
+print("Response from Azure OpenAI:")
+print(response.choices[0].message.content)
 
-# Evaluate must be called inside of __main__, not on import
-if __name__ == "__main__":
-    from bot_src.config import ASSET_PATH
-
-    # workaround for multiprocessing issue on linux
-    from pprint import pprint
-    from pathlib import Path
-    import multiprocessing
-    import contextlib
-
-    with contextlib.suppress(RuntimeError):
-        multiprocessing.set_start_method("spawn", force=True)
-
-    # run evaluation with a dataset and target function, log to the project
-    result = evaluate(
-        data=Path(ASSET_PATH) / "bot_src/chat_eval_data.jsonl",
-        target=evaluate_chat_with_intune,
-        evaluation_name="evaluate_chat_with_intune",
-        evaluators={
-            "groundedness": groundedness,
-        },
-        evaluator_config={
-            "default": {
-                "query": {"${data.query}"},
-                "response": {"${target.response}"},
-                "context": {"${target.context}"},
-            }
-        },
-        azure_ai_project=project.scope,
-        output_path="./myevalresults.json",
-    )
-
-    tabular_result = pd.DataFrame(result.get("rows"))
-
-    pprint("-----Summarized Metrics-----")
-    pprint(result["metrics"])
-    pprint("-----Tabular Result-----")
-    pprint(tabular_result)
-    pprint(f"View evaluation results in AI Studio: {result['studio_url']}")
+# Show tracing URL
+print("\nView traces at:")
+print(f"https://ai.azure.com/tracing?wsid=/subscriptions/{project.scope['subscription_id']}/resourceGroups/{project.scope['resource_group_name']}/providers/Microsoft.MachineLearningServices/workspaces/{project.scope['project_name']}")

@@ -26,6 +26,8 @@ Retrieval Strategy: RAG - retrieve documents and data at runtime to enrich LLM r
 
 [Tutorial: Part 1 - Set up project and development environment to build a custom knowledge retrieval (RAG) app with the Azure AI Foundry SDK] ( https://learn.microsoft.com/en-us/azure/ai-foundry/tutorials/copilot-sdk-create-resources?tabs=macos )
 [Create AI Search Service](https://learn.microsoft.com/en-us/azure/search/search-create-service-portal)
+[How to trace your application with Azure AI Foundry project library (preview)](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/develop/trace-local-sdk?tabs=python)
+[OpenAI GPT-3 API error: "Invalid URL (POST /v1/chat/completions)"](https://stackoverflow.com/questions/75882988/openai-gpt-3-api-error-invalid-url-post-v1-chat-completions)
 
 ## Technology Used 
 - Python
