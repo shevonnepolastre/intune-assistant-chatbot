@@ -1,70 +1,84 @@
 # Intune Assistant Chatbot
 
-I'm currently participating in the Microsoft AI Skills Fest. One of my technical mentors suggested building a chatbot using Retrieval-Augmented Generation (RAG) to deepen my AI learning.  
+A RAG-based chatbot built with Azure AI Foundry and Azure Cognitive Search that helps
+IT support teams and employees navigate Microsoft Intune — device enrollment, compliance
+policies, and troubleshooting.
 
-I'm learning Python and want to pivot toward DevOps and AI — this project combines both as a real-world practice project.
-
-Therefore, I decided to build a chatbot that teaches users how to implement Microsoft Intune for a company.
-
----
-
-## Why Intune?
-
-I am about to manage a project that involves standing up Microsoft Intune for a client.  
-Building this chatbot gives me a practical, hands-on way to explore device management concepts while advancing my Python, Azure, and AI development skills.
+Built as a hands-on learning project during the Microsoft AI Skills Fest, combining
+real Intune knowledge with Python, Azure AI, and RAG architecture.
 
 ---
 
-## Project Scenario
+## Scenario
 
-This project builds an intelligent chatbot to assist IT support teams and employees at **Skyline Dynamics** with Microsoft Intune device enrollment, compliance, and troubleshooting.
-
-The chatbot uses Retrieval-Augmented Generation (RAG) to dynamically retrieve internal documentation and Intune policy information at runtime, ensuring accurate and contextually relevant responses.
-
----
-
-## Architecture Overview
-
-- **Frontend**: Copilot SDK chatbot interface
-- **Backend**: Azure AI Foundry SDK and Python
-- **Retrieval Strategy**: RAG — retrieves documents and data at runtime to ground LLM responses
-- **Search Engine**: Azure Cognitive Search
-
-<br>
-
-<img src="https://github.com/shevonnepolastre/intune-assistant-chatbot/blob/main/images/azure_rag_chatbot_architecture.png" alt="Azure AI Foundry RAG Architecture" width="600">
+The chatbot is scoped to a fictional company, **Skyline Dynamics**, standing up Intune
+for the first time. It retrieves internal documentation and Intune policy information
+at runtime to ground responses — no static Q&A pairs, no hallucinated policy details.
 
 ---
 
-## What I Learned
+## Architecture
 
-- How to create and configure an Azure AI Foundry project
-- How to index internal documents into Azure AI Search
-- How to create a custom intent mapping model using Azure Prompty files
-- How to perform semantic search with vector embeddings
-- How to add observability with Application Insights tracing
-- How to debug common errors with Azure OpenAI deployments (e.g., invalid URL errors)
-- How to build an end-to-end RAG solution grounded in a real-world business case
+| Layer | Technology |
+|-------|------------|
+| Frontend | Copilot SDK chatbot interface |
+| Backend | Azure AI Foundry SDK + Python |
+| Retrieval | RAG — documents retrieved at runtime via vector search |
+| Search | Azure Cognitive Search |
+| Observability | OpenTelemetry + Application Insights |
 
----
-
-## Resources 
-
-- [Tutorial: Part 1 - Set up project and development environment to build a custom knowledge retrieval (RAG) app with the Azure AI Foundry SDK](https://learn.microsoft.com/en-us/azure/ai-foundry/tutorials/copilot-sdk-create-resources?tabs=macos)
-- [Create AI Search Service](https://learn.microsoft.com/en-us/azure/search/search-create-service-portal)
-- [How to trace your application with Azure AI Foundry project library (preview)](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/develop/trace-local-sdk?tabs=python)
-- [OpenAI GPT-3 API error: "Invalid URL (POST /v1/chat/completions)"](https://stackoverflow.com/questions/75882988/openai-gpt-3-api-error-invalid-url-post-v1-chat-completions)
+![Azure AI Foundry RAG Architecture](images/azure_rag_chatbot_architecture.png)
 
 ---
 
-## Technologies Used
+## How It Works
 
-- Python
-- Azure AI Foundry SDK
-- Azure Cognitive Search
-- Azure OpenAI Service
-- GitHub
-- VS Code
-- Retrieval-Augmented Generation (RAG)
-- OpenTelemetry + Application Insights (for tracing)
+1. Internal Intune documentation is indexed into Azure AI Search using vector embeddings
+2. At runtime, the user's query is converted to a vector and matched against the index
+3. Relevant documents are retrieved and passed as context to the Azure OpenAI model
+4. The model generates a response grounded in the retrieved content
+5. Traces are captured via Application Insights for observability and debugging
 
+---
+
+## Technologies
+
+| Tool | Purpose |
+|------|---------|
+| Python | Core application language |
+| Azure AI Foundry SDK | Project configuration, model deployment, RAG orchestration |
+| Azure Cognitive Search | Document indexing and semantic/vector retrieval |
+| Azure OpenAI Service | LLM for response generation |
+| Azure Prompty | Custom intent mapping |
+| OpenTelemetry + Application Insights | Tracing and observability |
+| VS Code | Development environment |
+| GitHub | Version control |
+
+---
+
+## What I Built and Learned
+
+- Configured an Azure AI Foundry project end to end
+- Indexed internal documentation into Azure AI Search with vector embeddings
+- Built a custom intent mapping model using Azure Prompty files
+- Implemented semantic search with vector embeddings for retrieval
+- Added Application Insights tracing for observability
+- Debugged Azure OpenAI deployment errors including invalid URL issues with the `/v1/chat/completions` endpoint
+- Built a complete RAG pipeline grounded in a real business scenario
+
+---
+
+## Reference Resources
+
+- [Build a custom knowledge retrieval (RAG) app with Azure AI Foundry SDK](https://learn.microsoft.com/en-us/azure/ai-foundry/tutorials/copilot-sdk-create-resources?tabs=macos)
+- [Create an Azure AI Search service](https://learn.microsoft.com/en-us/azure/search/search-create-service-portal)
+- [Trace your application with Azure AI Foundry SDK](https://learn.microsoft.com/en-us/azure/ai-foundry/how-to/develop/trace-local-sdk?tabs=python)
+- [Azure OpenAI invalid URL error fix](https://stackoverflow.com/questions/75882988/openai-gpt-3-api-error-invalid-url-post-v1-chat-completions)
+
+---
+
+## Related Projects
+
+- [azure-infrastructure-labs](https://github.com/shevonnepolastre/minecraft-azure-quests) — AZ-104 lab environment covering identity, storage, compute, networking, and monitoring
+- [azure-hub-spoke-platform](https://github.com/shevonnepolastre/azure-hub-spoke-platform) — enterprise hub-and-spoke network architecture in Bicep
+- [minecraft-azure-server](https://github.com/shevonnepolastre/minecraft-azure-server) — automated Minecraft server deployment on Azure using GitHub Actions and Bicep
